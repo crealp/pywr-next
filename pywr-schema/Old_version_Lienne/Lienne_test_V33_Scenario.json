@@ -1,0 +1,496 @@
+{
+  "metadata": {
+        "title": "Test ET",
+        "description": "Scenario constante Construction d'un modele PYWR Next pour la Lienne, avec Input CSV pour le catchement, ajout d'un reservoir unique, ajout demande bisse",
+        "minimum_version": "2"
+  },
+  "timestepper": {
+        "start": "2015-01-01",
+        "end": "2015-12-31",
+        "timestep": {
+        "type": "Days",
+        "days": 1
+        }
+  },
+  "scenarios": {
+        "groups": [
+            {
+            "name": "Scenario Climat",
+            "size": 2
+            },
+            {
+            "name": "Scenario Demande",
+            "size": 2
+            }       
+        ]
+  },
+  "network": {
+        "nodes": [
+            {
+                "meta": {
+                "name": "Bassin Versant Lienne"
+                },
+                "type": "Catchment",
+                "flow": {
+                    "type": "Timeseries",
+                    "name": "flow_BV_Lienne_scenarios_ts",
+                    "columns": {
+                        "type": "Scenario",
+                        "name": "Scenario Climat"
+                    }
+                }
+            },
+            {
+                "meta": {
+                "name": "Bassin Versant Valseret"
+                },
+                "type": "Catchment",
+                "flow": {
+                    "type": "Timeseries",
+                    "name": "flow_BV_Valseret_scenarios_ts",
+                    "columns": {
+                        "type": "Scenario",
+                        "name": "Scenario Climat"
+                    }
+                }
+            },
+            {
+                "meta": {
+                    "name": "Barrage Zeuzier"
+                },
+                "type": "Reservoir",
+                "max_volume": {
+                    "type": "Literal",
+                    "value": 100
+                    },
+                "cost": {
+                    "type": "Literal",
+                    "value": 10
+                    },
+                "initial_volume": {
+                    "type": "Proportional",
+                    "proportion": 0.5
+                    },
+                "compensation": {
+                    "type": "Literal",
+                    "value": 1.0
+                    },
+                "spill": "LinkNode"
+            },
+            {
+                "meta": {
+                "name": "Storage Zeuzier"
+                },
+                "type": "PiecewiseStorage",
+                "initial_volume": {
+                    "type": "Proportional",
+                    "proportion": 1.0
+                },
+                "max_volume": {
+                    "type": "Literal",
+                    "value": 1000.0
+                },
+                "steps": [
+                {
+                    "cost": {
+                        "type": "Literal",
+                        "value": -15
+                    },
+                    "control_curve": {
+                        "type": "Literal",
+                        "value": 0.25
+                        }
+                },
+                {
+                    "cost": {
+                        "type": "Literal",
+                        "value": -5
+                        },
+                    "control_curve": {
+                        "type": "Literal",
+                        "value": 0.5
+                    }
+                }
+                ]
+            },   
+            {
+                "meta": {
+                "name": "River termination"
+                },
+                "type": "Output",
+                "cost": {
+                    "type": "Literal",
+                    "value": 10
+                    }
+            },   
+                        {
+                "meta": {
+                "name": "Galerie Amenee"
+                },
+                "type": "River"
+            },   
+            {
+                "meta": {
+                "name": "River Split Valseret"
+                },
+                "type": "RiverSplitWithGauge",
+                "mrf": {
+                    "type": "Literal",
+                    "value": 5.0
+                },
+                "mrf_cost": {
+                    "type": "Literal",
+                    "value": -20
+                },
+                "splits": [
+                    {
+                        "factor": {
+                        "type": "Literal",
+                        "value":  0.99
+                        },
+                        "slot_name": "Adduction Valseret"
+                    }
+                ]
+            },
+           {
+                "meta": { "name": "Capteur Adduction Valseret" },
+                "type": "Link",
+                "max_flow": {
+                    "type": "Timeseries",
+                    "name": "Adduction_Valseret_ts"
+                },
+                "cost": { "type": "Literal", "value": -15 } 
+            }, 
+            {
+                "meta": {
+                   "name": "Demande Bisse Ayent"
+                },
+                "type": "Output",
+                "max_flow": {
+                    "type": "Parameter",
+                    "name": "Demand_Monthly_Flow_Bisse_Ayent"
+                },
+                "cost": {
+                    "type": "Literal",
+                    "value": -10
+                }
+            },
+            {
+                "meta": {
+                   "name": "Demande Bisse Anzere"
+                },
+                "type": "Output",
+                "max_flow": {
+                    "type": "Parameter",
+                    "name": "Demand_Monthly_Flow_Bisse_Anzere"
+                },
+                "cost": {
+                    "type": "Literal",
+                    "value": -10
+                }
+            },
+            {
+                "meta": {
+                   "name": "Demande Bisse Sion"
+                },
+                "type": "Output",
+                "max_flow": {
+                    "type": "Parameter",
+                    "name": "Demand_Monthly_Flow_Bisse_Sion"
+                },
+                "cost": {
+                    "type": "Literal",
+                    "value": -10
+                }
+            },
+            {
+                "meta": {
+                   "name": "Demande Eau Potable Ayent"
+                },
+                "type": "Output",
+                "max_flow": {
+                    "type": "Parameter",
+                    "name": "Demand_Monthly_Eau_Potable_Ayent"
+                },
+                "cost": {
+                    "type": "Literal",
+                    "value": -10
+                }
+            },
+            {
+                "meta":{
+                    "name": "Link HydroElectricite"
+                },
+                "type": "Link",
+                "max_flow": {
+                    "type": "Timeseries",
+                    "name": "Demand_HydroElectricite_ts",
+                    "columns": {
+                        "type": "Scenario",
+                        "name": "Scenario Demande"
+                    }
+                },
+                "cost": {
+                    "type": "Literal",
+                    "value": -10
+                }                
+            },
+            {
+                "meta": {
+                    "name": "Exutoire St Leonard"
+                },
+                "type": "Output"
+            }
+        ],
+        "timeseries":[
+            {
+                "meta": {
+                   "name": "flow_BV_Lienne_scenarios_ts"
+                },
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Input_Flow_BV_Lienne_V4_Scenario.csv"              
+            },
+            {
+                "meta": {
+                   "name": "flow_BV_Valseret_scenarios_ts"
+                },
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Input_Flow_BV_Valseret_V4_Scenario.csv"              
+            },
+            {
+                "meta": {
+                   "name": "Adduction_Valseret_ts"
+                },
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Adduction_Valseret.csv"
+            },
+            {
+                "meta": {
+                   "name": "Demand_HydroElectricite_ts"
+                },
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Demand_HydroElectricite_V4_Scenario.csv"
+            }
+
+        ],
+        "virtual_nodes": [
+            {
+                "meta": {
+                "name": "Total Bisse"
+                },
+                "type": "Aggregated",
+                "nodes": [
+                    {
+                        "name": "Demande Bisse Ayent"
+                    },
+                    {
+                        "name": "Demande Bisse Sion"
+                    },
+                    {
+                        "name": "Demande Bisse Anzere"
+                    }
+
+                ]
+            }
+        ],
+        "edges": [
+            {
+                "from_node": "Bassin Versant Lienne",
+                "to_node": "Barrage Zeuzier"
+            },
+            {
+                "from_node": "Bassin Versant Valseret",
+                "to_node": "River Split Valseret"
+            },
+            {
+                "from_node": "River Split Valseret",
+                "from_slot": {
+                    "type": "User",
+                    "name": "Adduction Valseret"
+                },
+                "to_node": "Capteur Adduction Valseret"
+            },
+            { 
+                "from_node": "Capteur Adduction Valseret", 
+                "to_node": "Barrage Zeuzier" 
+            },
+            {
+                "from_node": "River Split Valseret",
+                "to_node": "River termination"
+            },
+            {
+                "from_node": "Barrage Zeuzier",
+                "from_slot": {
+                "type": "Spill"
+                },
+                "to_node": "River termination"
+            },
+            {
+                "from_node": "Barrage Zeuzier",
+                "to_node": "Storage Zeuzier"
+            },             
+           {
+                "from_node": "Storage Zeuzier",
+                "to_node": "Galerie Amenee"
+            },             
+            {
+                "from_node": "Storage Zeuzier",
+                "to_node": "Demande Bisse Ayent"
+            },             
+            {
+                "from_node": "Storage Zeuzier",
+                "to_node": "Demande Bisse Anzere"
+            },           
+            {
+                "from_node": "Galerie Amenee",
+                "to_node": "Demande Bisse Sion"
+            },  
+            {
+                "from_node": "Galerie Amenee",
+                "to_node": "Demande Eau Potable Ayent"
+            },                    
+            {
+                "from_node": "Galerie Amenee",
+                "to_node": "Link HydroElectricite"
+            },
+            {
+                "from_node": "Link HydroElectricite",
+                "to_node": "Exutoire St Leonard"
+            }           
+         ],
+
+        "parameters":[
+             {
+                "type": "MonthlyProfile",
+                "meta": {
+                    "name": "Demand_Monthly_Eau_Potable_Ayent"
+                },
+                "values": {
+                "type": "Literal",
+                "values": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.5,
+                    0.5,
+                    1,
+                    1,
+                    0.5,
+                    0.3,
+                    0,
+                    0,
+                    0
+                    ]
+                }
+            },
+            {
+                "type": "MonthlyProfile",
+                "meta": {
+                    "name": "Demand_Monthly_Flow_Bisse_Ayent"
+                },
+                "values": {
+                "type": "Literal",
+                "values": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.5,
+                    0.5,
+                    1,
+                    1,
+                    0.5,
+                    0.3,
+                    0,
+                    0,
+                    0
+                    ]
+                }
+            },
+            {
+                "type": "MonthlyProfile",
+                "meta": {
+                    "name": "Demand_Monthly_Flow_Bisse_Anzere"
+                },
+                "values": {
+                "type": "Literal",
+                "values": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.5,
+                    0.5,
+                    1,
+                    1,
+                    0.5,
+                    0.3,
+                    0,
+                    0,
+                    0
+                    ]
+                }
+            },
+            {
+                "type": "MonthlyProfile",
+                "meta": {
+                    "name": "Demand_Monthly_Flow_Bisse_Sion"
+                },
+                "values": {
+                "type": "Literal",
+                "values": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.5,
+                    0.5,
+                    1,
+                    1,
+                    0.5,
+                    0.3,
+                    0,
+                    0,
+                    0
+                    ]
+                }
+            }
+        
+        ],
+        "metric_sets": [
+            {
+                "name": "nodes",
+                "filters": {
+                    "all_nodes": true
+                }
+            },
+            {
+                "name": "edges",
+                    "filters": {
+                        "all_edges": true
+                    }
+                }
+        ],
+        "outputs": [
+            {
+                "name": "node-outputs",
+                "type": "CSV",
+                "format": "Long",
+                "filename": "Lienne-nodes.csv",
+                "metric_set": [
+                    "nodes"
+                ]
+            },
+            {
+                "name": "edge-outputs",
+                "type": "CSV",
+                "format": "Long",
+                "filename": "Lienne-edges.csv",
+                "metric_set": [
+                    "edges"
+                ]
+            }
+        ]
+  }
+}

@@ -1,0 +1,446 @@
+{
+  "metadata": {
+        "title": "Test ET",
+        "description": "Scenario constante Construction d'un modele PYWR Next pour la Lienne, avec Input CSV pour le catchement, ajout d'un reservoir unique, ajout demande bisse",
+        "minimum_version": "2"
+  },
+  "timestepper": {
+        "start": "2015-01-01",
+        "end": "2015-12-31",
+        "timestep": {
+        "type": "Days",
+        "days": 1
+        }
+  },
+  "scenarios": {
+        "groups": [
+            {"name": "Scenario Climat","size": 2},
+            {"name": "Scenario Demande","size": 2}       
+        ]
+  },
+  "network": {
+        "nodes": [
+            {
+                "meta": {"name": "Bassin Versant Lienne"},
+                "type": "Catchment",
+                "flow": {
+                    "type": "Timeseries",
+                    "name": "flow_BV_Lienne_scenarios_ts",
+                    "columns": {"type": "Scenario","name": "Scenario Climat"}
+                }
+            },
+            {
+                "meta": {"name": "Bassin Versant Ertense"},
+                "type": "Catchment",
+                "flow": {
+                    "type": "Timeseries",
+                    "name": "flow_BV_Ertense_scenarios_ts",
+                    "columns": {"type": "Scenario","name": "Scenario Climat"}
+                }
+            },
+            {
+                "meta": {"name": "Bassin Versant SteCroix"},
+                "type": "Catchment",
+                "flow": {
+                    "type": "Timeseries",
+                    "name": "flow_BV_SteCroix_scenarios_ts",
+                    "columns": { "type": "Scenario", "name": "Scenario Climat"}
+                }
+            },
+            {
+                "meta": {"name": "Bassin Versant Valseret"},
+                "type": "Catchment",
+                "flow": {
+                    "type": "Timeseries",
+                    "name": "flow_BV_Valseret_scenarios_ts",
+                    "columns": {"type": "Scenario","name": "Scenario Climat" }
+                }
+            },
+            {
+                "meta": {"name": "Barrage Zeuzier"},
+                "type": "Reservoir",
+                "max_volume": {"type": "Literal","value": 100},
+                "cost": {"type": "Literal","value": 10},
+                "initial_volume": {"type": "Proportional","proportion": 0.5},
+                "compensation": {"type": "Literal","value": 1.0},
+                "spill": "LinkNode"
+            },
+            {
+                "meta": {"name": "Barrage BassinCompensation"},
+                "type": "Reservoir",
+                "max_volume": {"type": "Literal","value": 100},
+                "cost": {"type": "Literal","value": 10},
+                "initial_volume": {"type": "Proportional","proportion": 0.5},
+                "compensation": {"type": "Literal","value": 0.1},
+                "spill": "LinkNode"
+            },
+            {
+                "meta": {"name": "Storage Zeuzier"},
+                "type": "PiecewiseStorage",
+                "initial_volume": {"type": "Proportional","proportion": 1.0},
+                "max_volume": {"type": "Literal","value": 1000.0},
+                "steps": [
+                {
+                    "cost": {"type": "Literal", "value": -15},
+                    "control_curve": {"type": "Literal","value": 0.25}
+                },
+                {
+                    "cost": {"type": "Literal", "value": -5},
+                    "control_curve": {"type": "Literal","value": 0.5}
+                }
+                ]
+            }, 
+            {
+                "meta": {"name": "Storage BassinCompensation"},
+                "type": "PiecewiseStorage",
+                "initial_volume": {"type": "Proportional","proportion": 1.0},
+                "max_volume": {"type": "Literal","value": 100.0},
+                "steps": [
+                    {"cost": {"type": "Literal","value": -15},
+                        "control_curve": {"type": "Literal","value": 0.25}},
+                    {"cost": {"type": "Literal","value": -5},
+                        "control_curve": {"type": "Literal","value": 0.5}}
+                    ]
+            },     
+            {
+                "meta": {"name": "Galerie Amenee"},
+                "type": "River"
+            },   
+            {
+                "meta": {
+                "name": "River Split Valseret"
+                },
+                "type": "RiverSplitWithGauge",
+                "mrf": {"type": "Literal", "value": 5.0},
+                "mrf_cost": {"type": "Literal","value": -20},
+                "splits": [
+                    {"factor": {"type": "Literal","value":  0.99},
+                    "slot_name": "Adduction Valseret"}
+                ]
+            },
+            {
+                "meta": {"name": "Demande Bisse Ayent"},
+                "type": "Output",
+                "max_flow": {"type": "Parameter","name": "Demand_Monthly_Flow_Bisse_Ayent"},
+                "cost": {"type": "Literal","value": -10}
+            },
+            {
+                "meta": {"name": "Demande Bisse Anzere"},
+                "type": "Output",
+                "max_flow": {"type": "Parameter","name": "Demand_Monthly_Flow_Bisse_Anzere"},
+                "cost": {"type": "Literal","value": -10}
+            },
+            {
+                "meta": {"name": "Demande Bisse Lens"},
+                "type": "Output",
+                "max_flow": {"type": "Parameter","name": "Demand_Monthly_Flow_Bisse_Lens"},
+                "cost": {"type": "Literal","value": -10}
+            },
+            {
+                "meta": {"name": "Demande Bisse Sion"},
+                "type": "Output",
+                "max_flow": {"type": "Parameter","name": "Demand_Monthly_Flow_Bisse_Sion"},
+                "cost": {"type": "Literal","value": -10}
+            },
+            {
+                "meta": {"name": "Demande Bisse Clavoz"},
+                "type": "Output",
+                "max_flow": {"type": "Parameter","name": "Demand_Monthly_Flow_Bisse_Clavoz"},
+                "cost": {"type": "Literal","value": -10}
+            },
+            {
+                "meta": {"name": "Demande Bisse Sillonin"},
+                "type": "Output",
+                "max_flow": {"type": "Parameter","name": "Demand_Monthly_Flow_Bisse_Sillonin"},
+                "cost": {"type": "Literal","value": -10}
+            },
+            {
+                "meta": {"name": "Demande Eau Potable Ayent"},
+                "type": "Output",
+                "max_flow": {"type": "Parameter","name": "Demand_Monthly_Eau_Potable_Ayent"},
+                "cost": {"type": "Literal","value": -10}
+            },
+            {
+                "meta": {"name": "Demande Irrigation Uvrier"},
+                "type": "Output",
+                "max_flow": {"type": "Parameter","name": "Demand_Monthly_Irrigation_Uvrier"},
+                "cost": {"type": "Literal","value": -10}
+            },
+            {
+                "meta": {"name": "Demande Irrigation StLeonard"},
+                "type": "Output",
+                "max_flow": {"type": "Parameter","name": "Demand_Monthly_Irrigation_StLeonard"},
+                "cost": {"type": "Literal","value": -10}
+            },
+           {
+                "meta": { "name": "Capteur Adduction Valseret" },
+                "type": "Link",
+                "max_flow": {
+                    "type": "Timeseries",
+                    "name": "Adduction_Valseret_ts"
+                },
+                "cost": { "type": "Literal", "value": -15 } 
+            }, 
+            {
+                "meta":{"name": "Link Amenee_Chamarin"},
+                "type": "Link",
+                "cost": {"type": "Literal","value": -10}                
+            },
+            {
+                "meta":{"name": "Link Chamarin_SteCroix"},
+                "type": "Link",
+                 "cost": {"type": "Literal","value": -10}                
+            },                       
+            {
+                "meta":{"name": "Link Beulet Uvrier"},
+                "type": "Link",
+                "cost": {"type": "Literal","value": -10}                
+            },
+            {
+                "meta":{"name": "Link Zeuzier_BassinCompensation"},
+                "type": "Link",
+                 "cost": {"type": "Literal","value": -10}                
+            },
+            {
+                "meta":{"name": "Link Storage BassinCompensation_Beulet"},
+                "type": "Link",
+                 "cost": {"type": "Literal","value": -10}                
+            },
+            {
+                "meta":{"name": "Link Storage BassinCompensation_HydroStLeonard"},
+                "type": "Link",
+                 "cost": {"type": "Literal","value": -10}                
+            },
+            {
+                "meta":{"name": "Link HydroElectricite Chamarin"},
+                "type": "Link",
+                "max_flow": {
+                    "type": "Timeseries",
+                    "name": "Demand_HydroElectricite_Chamarin_ts",
+                    "columns": {"type": "Scenario","name": "Scenario Demande"}},
+                "cost": {"type": "Literal","value": -10}                
+            },
+            {
+                "meta":{"name": "Link HydroElectricite SteCroix"},
+                "type": "Link",
+                "max_flow": {
+                    "type": "Timeseries",
+                    "name": "Demand_HydroElectricite_SteCroix_ts",
+                    "columns": {"type": "Scenario","name": "Scenario Demande"}
+                },
+                "cost": {"type": "Literal","value": -10}                
+            },
+            {
+                "meta":{"name": "Link HydroElectricite Beulet"},
+                "type": "Link",
+                "max_flow": {
+                    "type": "Timeseries",
+                    "name": "Demand_HydroElectricite_Beulet_ts",
+                    "columns": {"type": "Scenario","name": "Scenario Demande"}
+                },
+                "cost": {"type": "Literal","value": -10}                
+            },
+            {
+                "meta":{"name": "Link HydroElectricite StLeonard"},
+                "type": "Link",
+                "max_flow": {
+                    "type": "Timeseries",
+                    "name": "Demand_HydroElectricite_StLeonard_ts",
+                    "columns": {"type": "Scenario","name": "Scenario Demande"}
+                },
+                "cost": {"type": "Literal","value": -10}                
+            },
+            {
+                "meta": {"name": "Exutoire Rhone"},"type": "Output"
+            }
+        ],
+        "timeseries":[
+            {
+                "meta": {"name": "flow_BV_Lienne_scenarios_ts"},
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Input_Flow_BV_Lienne_V4_Scenario.csv"              
+            },
+            {
+                "meta": {"name": "flow_BV_Ertense_scenarios_ts"},
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Input_Flow_BV_Ertense_V4_Scenario.csv"              
+            },            
+            {
+                "meta": {"name": "flow_BV_SteCroix_scenarios_ts"},
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Input_Flow_BV_SteCroix_V4_Scenario.csv"              
+            },
+            {
+                "meta": { "name": "flow_BV_Valseret_scenarios_ts"},
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Input_Flow_BV_Valseret_V4_Scenario.csv"              
+            },
+            {
+                "meta": {"name": "Adduction_Valseret_ts"},
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Adduction_Valseret.csv"
+            },
+            {
+                "meta": {"name": "Demand_HydroElectricite_Chamarin_ts"},
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Demand_HydroElectricite_Chamarin_V4_Scenario.csv"
+            },
+             {
+                "meta": { "name": "Demand_HydroElectricite_SteCroix_ts"},
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Demand_HydroElectricite_SteCroix_V4_Scenario.csv"
+            },
+            {
+                "meta": {"name": "Demand_HydroElectricite_Beulet_ts"},
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Demand_HydroElectricite_Beulet_V4_Scenario.csv"
+            },
+            {
+                "meta": {"name": "Demand_HydroElectricite_StLeonard_ts"},
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Demand_HydroElectricite_StLeonard_V4_Scenario.csv"
+            }        
+        ],
+        "virtual_nodes": [
+            {
+                "meta": {"name": "Total Bisse"},
+                "type": "Aggregated",
+                "nodes": [
+                    {"name": "Demande Bisse Ayent"},
+                    {"name": "Demande Bisse Sion"},
+                    {"name": "Demande Bisse Anzere"},
+                    {"name": "Demande Bisse Clavoz"}
+                ]
+            }
+        ],
+        "edges": [
+            {"from_node": "Bassin Versant Lienne",          "to_node": "Barrage Zeuzier"},
+            {"from_node": "Bassin Versant Ertense",         "to_node": "Link Zeuzier_BassinCompensation"},
+            {"from_node": "Bassin Versant SteCroix",        "to_node": "Barrage BassinCompensation"},
+            {"from_node": "Bassin Versant Valseret",        "to_node": "River Split Valseret"},
+            {"from_node": "River Split Valseret","from_slot": { "type": "User","name": "Adduction Valseret"},
+                                                            "to_node": "Capteur Adduction Valseret"},
+            {"from_node": "Capteur Adduction Valseret",     "to_node": "Barrage Zeuzier"},
+            {"from_node": "River Split Valseret",           "to_node": "Link Zeuzier_BassinCompensation"},
+            {"from_node": "Barrage Zeuzier","from_slot": { "type": "Spill" },
+                                                            "to_node": "Link Zeuzier_BassinCompensation"},
+            {"from_node": "Barrage Zeuzier",                "to_node": "Storage Zeuzier"},                        
+            {"from_node": "Link Zeuzier_BassinCompensation","to_node": "Barrage BassinCompensation"},   
+            {"from_node": "Link Zeuzier_BassinCompensation","to_node": "Demande Bisse Lens"},            
+            {"from_node": "Storage Zeuzier",                "to_node": "Galerie Amenee"},                        
+            {"from_node": "Storage Zeuzier",                "to_node": "Demande Bisse Anzere"},           
+            {"from_node": "Galerie Amenee",                 "to_node": "Demande Bisse Sion"},  
+            {"from_node": "Galerie Amenee",                 "to_node": "Demande Eau Potable Ayent"},                    
+            {"from_node": "Galerie Amenee",                 "to_node": "Link Amenee_Chamarin"},
+            {"from_node": "Link Amenee_Chamarin",           "to_node": "Demande Bisse Ayent"},
+            {"from_node": "Link Amenee_Chamarin",           "to_node": "Link HydroElectricite Chamarin"},
+            {"from_node": "Link HydroElectricite Chamarin", "to_node": "Link Chamarin_SteCroix"},            
+            {"from_node": "Link Chamarin_SteCroix",         "to_node": "Link HydroElectricite SteCroix"},
+            {"from_node": "Link HydroElectricite SteCroix", "to_node": "Barrage BassinCompensation"},
+            {"from_node": "Barrage BassinCompensation","from_slot": {"type": "Spill"},
+                                                            "to_node": "Link Storage BassinCompensation_Beulet"},
+            {"from_node": "Barrage BassinCompensation",     "to_node": "Storage BassinCompensation"},
+            {"from_node": "Storage BassinCompensation",     "to_node": "Link Storage BassinCompensation_Beulet"},
+            {"from_node": "Storage BassinCompensation",     "to_node": "Link Beulet Uvrier"},
+            {"from_node": "Storage BassinCompensation",     "to_node": "Link Storage BassinCompensation_HydroStLeonard"},           {"from_node": "Link Storage BassinCompensation_Beulet","to_node": "Demande Bisse Clavoz"},
+            {"from_node": "Link Storage BassinCompensation_Beulet","to_node": "Link HydroElectricite Beulet"},
+            {"from_node": "Link Storage BassinCompensation_Beulet","to_node": "Link Beulet Uvrier"},
+            {"from_node": "Link Storage BassinCompensation_HydroStLeonard",     "to_node": "Demande Bisse Sillonin"},              
+            {"from_node": "Link Storage BassinCompensation_HydroStLeonard",     "to_node": "Link HydroElectricite StLeonard"},              
+            {"from_node": "Link HydroElectricite Beulet",   "to_node": "Link Beulet Uvrier"},  
+            {"from_node": "Link Beulet Uvrier",             "to_node": "Demande Irrigation Uvrier"},
+            {"from_node": "Link Beulet Uvrier",             "to_node": "Demande Irrigation StLeonard"},
+            {"from_node": "Link Beulet Uvrier",             "to_node": "Exutoire Rhone"},          
+            {"from_node": "Link HydroElectricite SteCroix", "to_node": "Exutoire Rhone"},           
+            {"from_node": "Link HydroElectricite StLeonard","to_node": "Exutoire Rhone"}             
+         ],
+
+        "parameters":[
+             {
+                "type": "MonthlyProfile",
+                "meta": {"name": "Demand_Monthly_Eau_Potable_Ayent"},
+                "values": {"type": "Literal","values": [0.0,0.0,0.0,0.5,0.5,1,1,0.5,0.3,0,0,0]}
+            },
+            {
+                "type": "MonthlyProfile",
+                "meta": {"name": "Demand_Monthly_Irrigation_Uvrier"},
+                "values": {"type": "Literal","values": [0.0,0.0,0.0,0.5,0.5,1,1,0.5,0.3,0,0,0]}
+            },
+            {
+                "type": "MonthlyProfile",
+                "meta": {"name": "Demand_Monthly_Irrigation_StLeonard"},
+                "values": {"type": "Literal","values": [0.0,0.0,0.0,0.5,0.5,1,1,0.5,0.3,0,0,0]}
+            },
+            {
+                "type": "MonthlyProfile",
+                "meta": {"name": "Demand_Monthly_Flow_Bisse_Ayent"},
+                "values": {"type": "Literal","values": [0.0,0.0,0.0,0.5,0.5,1,1,0.5,0.3,0,0,0]}
+            },
+            {
+                "type": "MonthlyProfile",
+                "meta": {"name": "Demand_Monthly_Flow_Bisse_Lens"},
+                "values": {"type": "Literal","values": [0.0,0.0,0.0,0.5,0.5,1,1,0.5,0.3,0,0,0]}
+            },
+            {
+                "type": "MonthlyProfile",
+                "meta": {"name": "Demand_Monthly_Flow_Bisse_Anzere"},
+                "values": {"type": "Literal","values": [0.0,0.0,0.0,0.5,0.5,1,1,0.5,0.3,0,0,0]}
+            },
+            {
+                "type": "MonthlyProfile",
+                "meta": {"name": "Demand_Monthly_Flow_Bisse_Sion"},
+                "values": {"type": "Literal","values": [0.0,0.0,0.0,0.5,0.5,1,1,0.5,0.3,0,0,0]}
+
+            },
+            {
+                "type": "MonthlyProfile",
+                "meta": {"name": "Demand_Monthly_Flow_Bisse_Clavoz"},
+                "values": {"type": "Literal","values": [0.0,0.0,0.0,0.5,0.5,1,1,0.5,0.3,0,0,0]}
+            },    
+            {
+                "type": "MonthlyProfile",
+                "meta": {"name": "Demand_Monthly_Flow_Bisse_Sillonin"},
+                "values": {"type": "Literal","values": [0.0,0.0,0.0,0.5,0.5,1,1,0.5,0.3,0,0,0]}
+            }   
+        ],
+        "metric_sets": [
+            {
+                "name": "nodes",
+                "filters": {"all_nodes": true}
+            },
+            {
+                "name": "edges",
+                "filters": {"all_edges": true}
+            }
+        ],
+        "outputs": [
+            {
+                "name": "node-outputs",
+                "type": "CSV",
+                "format": "Long",
+                "filename": "Lienne-nodes.csv",
+                "metric_set": [
+                    "nodes"
+                ]
+            },
+            {
+                "name": "edge-outputs",
+                "type": "CSV",
+                "format": "Long",
+                "filename": "Lienne-edges.csv",
+                "metric_set": [
+                    "edges"
+                ]
+            }
+        ]
+  }
+}

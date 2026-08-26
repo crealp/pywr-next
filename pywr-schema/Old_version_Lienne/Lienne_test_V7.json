@@ -1,0 +1,198 @@
+{
+  "metadata": {
+        "title": "Test ET",
+        "description": "Construction d'un modele PYWR Next pour la Lienne, avec Input CSV pour le catchement, ajout d'un reservoir unique, ajout demande bisse",
+        "minimum_version": "0.1"
+  },
+  "timestepper": {
+        "start": "2015-01-01",
+        "end": "2015-12-31",
+        "timestep": {
+        "type": "Days",
+        "days": 1
+        }
+  },
+  "network": {
+        "nodes": [
+            {
+                "meta": {
+                "name": "Bassin Versant Lienne"
+                },
+                "type": "Catchment",
+                "flow": {
+                    "type": "Timeseries",
+                    "name": "Input_Flow_BVLienne_ts"
+                }
+            },
+            {
+                "meta": {
+                    "name": "Barrage Zeuzier"
+                },
+                "type": "Reservoir",
+                "max_volume": {
+                    "type": "Literal",
+                    "value": 300
+                    },
+                "cost": {
+                    "type": "Literal",
+                    "value": -1.0
+                    },
+                "initial_volume": {
+                    "type": "Proportional",
+                    "proportion": 0.95
+                    },
+                "compensation": {
+                    "type": "Literal",
+                    "value": 1.0
+                    },
+                "spill": "LinkNode"
+            },   
+            {
+                "meta": {
+                "name": "River termination"
+                },
+                "type": "Output"
+            },   
+            {
+                "meta": {
+                   "name": "Demande Bisse Ayent"
+                },
+                "type": "Output",
+                "max_flow": {
+                    "type": "Parameter",
+                    "name": "Demand_Monthly_Flow_Bisse_Ayent"
+                },
+                "cost": {
+                    "type": "Literal",
+                    "value": -10
+                }
+            },
+            {
+                "meta":{
+                    "name": "Link HydroElectricite"
+                },
+                "type": "Link",
+                "max_flow": {
+                    "type": "Timeseries",
+                    "name": "Demand_HydroElectricite_ts"
+                },
+                "cost": {
+                    "type": "Literal",
+                    "value": -10
+                }                
+            },
+            {
+                "meta": {
+                    "name": "Exutoire St Leonard"
+                },
+                "type": "Output"
+            }
+        ],
+        "timeseries":[
+            {
+                "meta": {
+                    "name": "Input_Flow_BVLienne_ts"
+                },
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Input_Flow_BV_Lienne.csv"
+            },
+            {
+                "meta": {
+                   "name": "Demand_HydroElectricite_ts"
+                },
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Demand_HydroElectricite.csv"
+            }
+
+        ],
+        "edges": [
+            {
+                "from_node": "Bassin Versant Lienne",
+                "to_node": "Barrage Zeuzier"
+            },
+            {
+                "from_node": "Barrage Zeuzier",
+                "from_slot": {
+                "type": "Spill"
+                },
+                "to_node": "River termination"
+            },
+            {
+                "from_node": "Barrage Zeuzier",
+                "to_node": "Demande Bisse Ayent"
+            },           
+            {
+                "from_node": "Barrage Zeuzier",
+                "to_node": "Link HydroElectricite"
+            },
+            {
+                "from_node": "Link HydroElectricite",
+                "to_node": "Exutoire St Leonard"
+            }           
+           
+          
+        ],
+        "parameters":[
+            {
+                "type": "MonthlyProfile",
+                "meta": {
+                    "name": "Demand_Monthly_Flow_Bisse_Ayent"
+                },
+                "values": {
+                "type": "Literal",
+                "values": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.5,
+                    0.5,
+                    1,
+                    1,
+                    0.5,
+                    0.3,
+                    0,
+                    0,
+                    0
+                    ]
+                }
+            }
+        
+        ],
+        "metric_sets": [
+            {
+                "name": "nodes",
+                "filters": {
+                    "all_nodes": true
+                }
+            },
+            {
+                "name": "edges",
+                    "filters": {
+                        "all_edges": true
+                    }
+                }
+        ],
+        "outputs": [
+            {
+                "name": "node-outputs",
+                "type": "CSV",
+                "format": "Long",
+                "filename": "Lienne-nodes.csv",
+                "metric_set": [
+                    "nodes"
+                ]
+            },
+            {
+                "name": "edge-outputs",
+                "type": "CSV",
+                "format": "Long",
+                "filename": "Lienne-edges.csv",
+                "metric_set": [
+                    "edges"
+                ]
+            }
+        ]
+  }
+}

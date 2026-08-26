@@ -1,0 +1,191 @@
+{
+  "metadata": {
+        "title": "Test ET",
+        "description": "Construction d'un modele PYWR Next pour la Lienne, avec Input CSV pour le catchement, ajout d'un reservoir unique, ajout demande bisse",
+        "minimum_version": "0.1"
+  },
+  "timestepper": {
+        "start": "2015-01-01",
+        "end": "2015-01-15",
+        "timestep": {
+        "type": "Days",
+        "days": 1
+        }
+  },
+  "network": {
+        "nodes": [
+            {
+                "meta": {
+                "name": "Bassin Versant Lienne"
+                },
+                "type": "Catchment",
+                "flow" : {
+                    "type" : "Literal",
+                    "value": 10
+                }
+            },
+            {
+                "meta": {
+                    "name": "Barrage Zeuzier"
+                },
+                "type": "Reservoir",
+                "max_volume": {
+                    "type": "Literal",
+                    "value": 100
+                    },
+                "cost": {
+                    "type": "Literal",
+                    "value": 10
+                    },
+                "initial_volume": {
+                    "type": "Proportional",
+                    "proportion": 0.5
+                    },
+                "compensation": {
+                    "type": "Literal",
+                    "value": 1.0
+                    },
+                "spill": "LinkNode"
+            },
+            {
+                "meta": {
+                "name": "Storage Zeuzier"
+                },
+                "type": "PiecewiseStorage",
+                "initial_volume": {
+                "type": "Proportional",
+                "proportion": 1.0
+                },
+                "max_volume": {
+                "type": "Literal",
+                "value": 1000.0
+                },
+                "steps": [
+                {
+                    "cost": {
+                    "type": "Literal",
+                    "value": -15
+                    },
+                    "control_curve": {
+                    "type": "Literal",
+                    "value": 0.25
+                    }
+                },
+                {
+                    "cost": {
+                    "type": "Literal",
+                    "value": -5
+                    },
+                    "control_curve": {
+                    "type": "Literal",
+                    "value": 0.5
+                    }
+                }
+                ]
+            },   
+            {
+                "meta": {
+                "name": "River termination"
+                },
+                "type": "Output",
+                "cost": {
+                    "type": "Literal",
+                    "value": 10
+                    }
+            },  
+            {
+                "meta": {
+                "name": "River Split Valseret"
+                },
+                "type": "RiverSplitWithGauge",
+                "mrf": {
+                    "type": "Literal",
+                    "value": 5.0
+                },
+                "mrf_cost": {
+                    "type": "Literal",
+                    "value": -20
+                },
+                "splits": [
+                    {
+                        "factor": {
+                        "type": "Literal",
+                        "value": 0.1
+                        },
+                        "slot_name": "Adduction Valseret"
+                    }
+                ]
+            },
+ 
+            {
+                "meta": {
+                   "name": "Demande Bisse Ayent"
+                },
+                "type": "Output",
+                "max_flow": {
+                    "type": "Literal",
+                    "value": 5
+                },
+                "cost": {
+                    "type": "Literal",
+                    "value": -10
+                }
+            }
+          ],
+        "edges": [
+            {
+                "from_node": "Bassin Versant Lienne",
+                "to_node": "Barrage Zeuzier"
+            },
+            {
+                "from_node": "Barrage Zeuzier",
+                "from_slot": {
+                "type": "Spill"
+                },
+                "to_node": "River termination"
+            },
+            {
+                "from_node": "Barrage Zeuzier",
+                "to_node": "Storage Zeuzier"
+            },             
+            {
+                "from_node": "Storage Zeuzier",
+                "to_node": "Demande Bisse Ayent"
+            }       
+        ],
+        "metric_sets": [
+            {
+                "name": "nodes",
+                "filters": {
+                    "all_nodes": true
+                }
+            },
+            {
+                "name": "edges",
+                    "filters": {
+                        "all_edges": true
+                    }
+                }
+        ],
+        "outputs": [
+            {
+                "name": "node-outputs",
+                "type": "CSV",
+                "format": "Long",
+                "filename": "Lienne-nodes.csv",
+                "metric_set": [
+                    "nodes"
+                ]
+            },
+            {
+                "name": "edge-outputs",
+                "type": "CSV",
+                "format": "Long",
+                "filename": "Lienne-edges.csv",
+                "metric_set": [
+                    "edges"
+                ]
+            }
+        ]
+  }
+}

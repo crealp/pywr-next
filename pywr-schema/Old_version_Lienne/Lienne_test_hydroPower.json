@@ -1,0 +1,144 @@
+{
+  "metadata": {
+        "title": "Test ET",
+        "description": "Construction d'un modele PYWR Next pour la Lienne, avec Input CSV pour le catchement, ajout d'un reservoir unique, ajout demande bisse",
+        "minimum_version": "0.1"
+  },
+  "timestepper": {
+        "start": "2015-01-01",
+        "end": "2015-01-15",
+        "timestep": {
+        "type": "Days",
+        "days": 1
+        }
+  },
+  "network": {
+        "nodes": [
+            {
+                "meta": {
+                "name": "Bassin Versant Lienne"
+                },
+                "type": "Catchment",
+                "flow": {
+                    "type": "Timeseries",
+                    "name": "Input_Flow_BVLienne_ts"
+                }
+            },
+            {
+                "meta": {
+                    "name": "Barrage Zeuzier"
+                },
+                "type": "Storage",
+                "initial_volume": {
+                    "type": "Absolute",
+                    "volume": 500.0
+                },
+                "max_volume": {
+                    "type": "Literal",
+                    "value": 600.0
+                }
+            },      
+            {
+                "meta": {
+                   "name": "Demande Bisse Ayent"
+                },
+                "type": "Output",
+                "max_flow": {
+                    "type": "Timeseries",
+                    "name": "Demand_Flow_Bisse_Ayent_ts"
+                },
+                "cost": {
+                    "type": "Literal",
+                    "value": -10
+                }
+            },
+            {
+                "meta": {
+                    "name": "Usine_de_Croix"
+                },
+                "type": "Turbine",
+                "cost": {
+                    "type": "Literal",
+                    "value": -200
+                },
+                "target": {
+                    "type": "Literal",
+                    "value": 100.0
+                },
+                "target_type": "MaxFlow",
+                "water_elevation": {
+                    "type": "Literal",
+                    "value": 100.0
+                },
+                "turbine_elevation": 1083,
+                "min_head": 1.0,
+                "efficiency": 0.85,
+                "flow_unit_conversion": 1.0,
+                "energy_unit_conversion": 1.0,
+                "water_density":1000
+            },
+            {
+                "meta": {
+                    "name": "Exutoire St Leonard"
+                },
+                "type": "Output"
+            }
+        ],
+        "timeseries":[
+            {
+                "meta": {
+                "name": "Input_Flow_BVLienne_ts"
+                },
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Input_Flow_BV_Lienne.csv"
+            },
+            {
+                "meta": {
+                "name": "Demand_Flow_Bisse_Ayent_ts"
+                },
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Demand_Flow_Bisse_Ayent.csv"
+            }
+        ],
+        "edges": [
+            {
+                "from_node": "Bassin Versant Lienne",
+                "to_node": "Barrage Zeuzier"
+            },
+                       {
+                "from_node": "Barrage Zeuzier",
+                "to_node": "Demande Bisse Ayent"
+            },           
+            {
+                "from_node": "Barrage Zeuzier",
+                "to_node": "Usine_de_Croix"
+            },
+                        {
+                "from_node": "Usine_de_Croix",
+                "to_node": "Exutoire St Leonard"
+            }           
+          
+        ],
+        "metric_sets": [
+            {
+                "name": "nodes",
+                "filters": {
+                "all_nodes": true
+                }
+            }
+            ],
+        "outputs": [
+            {
+                "name": "node-outputs",
+                "type": "CSV",
+                "format": "Long",
+                "filename": "Test_ET.csv",
+                "metric_set": [
+                "nodes"
+                ]
+            }
+        ]
+  }
+}

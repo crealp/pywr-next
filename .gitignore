@@ -222,3 +222,5 @@ target/
 **/*.rs.bk
 
 .DS_Store
+pywr-python/pywr/pywr.pdb
+*.csv

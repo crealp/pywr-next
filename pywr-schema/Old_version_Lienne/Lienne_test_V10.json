@@ -1,0 +1,369 @@
+{
+  "metadata": {
+        "title": "Test ET",
+        "description": "Scenario constante Construction d'un modele PYWR Next pour la Lienne, avec Input CSV pour le catchement, ajout d'un reservoir unique, ajout demande bisse",
+        "minimum_version": "0.1"
+  },
+  "timestepper": {
+        "start": "2015-01-01",
+        "end": "2015-01-15",
+        "timestep": {
+        "type": "Days",
+        "days": 1
+        }
+  },
+  "scenarios": {
+        "groups": [
+            {
+            "name": "Scenario Climat",
+            "size": 2,
+            "labels": ["Historique", "Sec"]
+            }
+        ],
+        "combinations": null
+  },
+  "network": {
+        "nodes": [
+            {
+                "meta": {
+                "name": "Bassin Versant Lienne"
+                },
+                "type": "Catchment",
+                "flow": {
+                    "type": "Parameter",
+                    "name": "flow_scenarios"
+                }
+            },
+            {
+                "meta": {
+                    "name": "Barrage Zeuzier"
+                },
+                "type": "Reservoir",
+                "max_volume": {
+                    "type": "Literal",
+                    "value": 100
+                    },
+                "cost": {
+                    "type": "Literal",
+                    "value": 10
+                    },
+                "initial_volume": {
+                    "type": "Proportional",
+                    "proportion": 0.5
+                    },
+                "compensation": {
+                    "type": "Literal",
+                    "value": 1.0
+                    },
+                "spill": "LinkNode"
+            },
+            {
+                "meta": {
+                "name": "Storage Zeuzier"
+                },
+                "type": "PiecewiseStorage",
+                "initial_volume": {
+                "type": "Proportional",
+                "proportion": 1.0
+                },
+                "max_volume": {
+                "type": "Literal",
+                "value": 1000.0
+                },
+                "steps": [
+                {
+                    "cost": {
+                    "type": "Literal",
+                    "value": -15
+                    },
+                    "control_curve": {
+                    "type": "Literal",
+                    "value": 0.25
+                    }
+                },
+                {
+                    "cost": {
+                    "type": "Literal",
+                    "value": -5
+                    },
+                    "control_curve": {
+                    "type": "Literal",
+                    "value": 0.5
+                    }
+                }
+                ]
+            },   
+            {
+                "meta": {
+                "name": "River termination"
+                },
+                "type": "Output",
+                "cost": {
+                    "type": "Literal",
+                    "value": 10
+                    }
+            },   
+            {
+                "meta": {
+                   "name": "Demande Bisse Ayent"
+                },
+                "type": "Output",
+                "max_flow": {
+                    "type": "Parameter",
+                    "name": "Demand_Monthly_Flow_Bisse_Ayent"
+                },
+                "cost": {
+                    "type": "Literal",
+                    "value": -10
+                }
+            },
+            {
+                "meta": {
+                   "name": "Demande Bisse Anzere"
+                },
+                "type": "Output",
+                "max_flow": {
+                    "type": "Parameter",
+                    "name": "Demand_Monthly_Flow_Bisse_Anzere"
+                },
+                "cost": {
+                    "type": "Literal",
+                    "value": -10
+                }
+            },
+            {
+                "meta": {
+                   "name": "Demande Bisse Sion"
+                },
+                "type": "Output",
+                "max_flow": {
+                    "type": "Parameter",
+                    "name": "Demand_Monthly_Flow_Bisse_Sion"
+                },
+                "cost": {
+                    "type": "Literal",
+                    "value": -10
+                }
+            },
+            {
+                "meta":{
+                    "name": "Link HydroElectricite"
+                },
+                "type": "Link",
+                "max_flow": {
+                    "type": "Timeseries",
+                    "name": "Demand_HydroElectricite_ts"
+                },
+                "cost": {
+                    "type": "Literal",
+                    "value": -10
+                }                
+            },
+            {
+                "meta": {
+                    "name": "Exutoire St Leonard"
+                },
+                "type": "Output"
+            }
+        ],
+        "timeseries":[
+            {
+                "meta": {
+                    "name": "Input_Flow_BVLienne_ts"
+                },
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Input_Flow_BV_Lienne_V3_Scenario.csv"
+            },
+            {
+                "meta": {
+                   "name": "Demand_HydroElectricite_ts"
+                },
+                "type": "Polars",
+                "time_col": "date",
+                "url": "Demand_HydroElectricite_V2.csv"
+            }
+
+        ],
+        "virtual_nodes": [
+            {
+                "meta": {
+                "name": "Total Bisse"
+                },
+                "type": "Aggregated",
+                "nodes": [
+                    {
+                        "name": "Demande Bisse Ayent"
+                    },
+                    {
+                        "name": "Demande Bisse Sion"
+                    },
+                    {
+                        "name": "Demande Bisse Anzere"
+                    }
+
+                ]
+            }
+        ],
+        "edges": [
+            {
+                "from_node": "Bassin Versant Lienne",
+                "to_node": "Barrage Zeuzier"
+            },
+            {
+                "from_node": "Barrage Zeuzier",
+                "from_slot": {
+                "type": "Spill"
+                },
+                "to_node": "River termination"
+            },
+            {
+                "from_node": "Barrage Zeuzier",
+                "to_node": "Storage Zeuzier"
+            },             
+            {
+                "from_node": "Barrage Zeuzier",
+                "to_node": "Demande Bisse Ayent"
+            },             
+            {
+                "from_node": "Barrage Zeuzier",
+                "to_node": "Demande Bisse Anzere"
+            },           
+            {
+                "from_node": "Barrage Zeuzier",
+                "to_node": "Demande Bisse Sion"
+            },                    
+            {
+                "from_node": "Storage Zeuzier",
+                "to_node": "Link HydroElectricite"
+            },
+            {
+                "from_node": "Link HydroElectricite",
+                "to_node": "Exutoire St Leonard"
+            }           
+           
+          
+        ],
+        "parameters":[
+            {
+                "type": "ConstantScenario",
+                "meta": {
+                "name": "flow_scenarios"
+                },
+                "values": {
+                    "type": "Literal",
+                    "values": [
+                        10.0,
+                        50
+                    ]
+                },
+                "scenario_group": "Scenario Climat"
+            },
+
+            {
+                "type": "MonthlyProfile",
+                "meta": {
+                    "name": "Demand_Monthly_Flow_Bisse_Ayent"
+                },
+                "values": {
+                "type": "Literal",
+                "values": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.5,
+                    0.5,
+                    1,
+                    1,
+                    0.5,
+                    0.3,
+                    0,
+                    0,
+                    0
+                    ]
+                }
+            },
+            {
+                "type": "MonthlyProfile",
+                "meta": {
+                    "name": "Demand_Monthly_Flow_Bisse_Anzere"
+                },
+                "values": {
+                "type": "Literal",
+                "values": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.5,
+                    0.5,
+                    1,
+                    1,
+                    0.5,
+                    0.3,
+                    0,
+                    0,
+                    0
+                    ]
+                }
+            },
+            {
+                "type": "MonthlyProfile",
+                "meta": {
+                    "name": "Demand_Monthly_Flow_Bisse_Sion"
+                },
+                "values": {
+                "type": "Literal",
+                "values": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.5,
+                    0.5,
+                    1,
+                    1,
+                    0.5,
+                    0.3,
+                    0,
+                    0,
+                    0
+                    ]
+                }
+            }
+        
+        ],
+        "metric_sets": [
+            {
+                "name": "nodes",
+                "filters": {
+                    "all_nodes": true
+                }
+            },
+            {
+                "name": "edges",
+                    "filters": {
+                        "all_edges": true
+                    }
+                }
+        ],
+        "outputs": [
+            {
+                "name": "node-outputs",
+                "type": "CSV",
+                "format": "Long",
+                "filename": "Lienne-nodes.csv",
+                "metric_set": [
+                    "nodes"
+                ]
+            },
+            {
+                "name": "edge-outputs",
+                "type": "CSV",
+                "format": "Long",
+                "filename": "Lienne-edges.csv",
+                "metric_set": [
+                    "edges"
+                ]
+            }
+        ]
+  }
+}

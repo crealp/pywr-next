@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "title": "Test ET",
+    "description": "Construction d'un modele PYWR Next pour la Lienne",
+    "minimum_version": "0.1"
+  },
+  "timestepper": {
+    "start": "2015-01-01",
+    "end": "2015-01-15",
+    "timestep": {
+      "type": "Days",
+      "days": 1
+    }
+  },
+  "network": {
+    "nodes": [
+      {
+        "meta": {
+          "name": "catchment1"
+        },
+        "type": "Catchment",
+        "flow": {
+          "type": "Literal",
+          "value": 15
+        }
+      },
+      {
+        "meta": {
+          "name": "term1"
+        },
+        "type": "Output"
+      }
+    ],
+    "edges": [
+      {
+        "from_node": "catchment1",
+        "to_node": "term1"
+      }
+    ],
+    "metric_sets": [
+      {
+        "name": "nodes",
+        "filters": {
+          "all_nodes": true
+        }
+      }
+    ],
+    "outputs": [
+      {
+        "name": "node-outputs",
+        "type": "CSV",
+        "format": "Long",
+        "filename": "Test_ET.csv",
+        "metric_set": [
+          "nodes"
+        ]
+      }
+    ]
+  }
+}
